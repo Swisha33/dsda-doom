@@ -622,7 +622,11 @@ if(VITA)
         "${VITASDK}/arm-vita-eabi/include/SDL2"
     )
 
-    # The engine itself, started by the launcher
+    # The engine itself, started by the launcher. vita.cmake expects the ELF
+    # in this directory, not in the top-level DSDA_OUTPUT_PATH.
+    set_target_properties(dsda-doom PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
     vita_create_self(dsda-doom.bin dsda-doom UNSAFE)
 
     # Launcher: picks IWAD / PWADs / DEH and starts dsda-doom.bin
