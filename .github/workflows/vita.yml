@@ -23,7 +23,24 @@ jobs:
           echo "$VITASDK/bin" >> "$GITHUB_PATH"
 
       - name: Build VPK
-        run: prboom2/vita/build.sh --deps
+        run: |
+          set -o pipefail
+          prboom2/vita/build.sh --deps 2>&1 | tee build.log
+
+      # Surface the build errors as annotations so they are readable
+      # from the checks API without downloading the full log.
+      - name: Report build errors
+        if: failure()
+        run: |
+          [ -f build.log ] || exit 0
+          grep -nE "error|Error|undefined reference|not found|No such file|cannot find|FAILED|fatal" build.log \
+            | grep -v "Werror" | head -120 > errors.txt || true
+          [ -s errors.txt ] || tail -60 build.log > errors.txt
+          split -l 12 errors.txt chunk_
+          for f in chunk_*; do
+            msg=$(sed -e 's/%/%25/g' "$f" | awk '{printf "%s%%0A", $0}')
+            echo "::error title=build ${f#chunk_}::${msg}"
+          done
 
       - uses: actions/upload-artifact@v4
         with:
