@@ -35,7 +35,8 @@ jobs:
           [ -f build.log ] || exit 0
           grep -nE "error|Error|undefined reference|not found|No such file|cannot find|FAILED|fatal" build.log \
             | grep -v "Werror" | head -120 > errors.txt || true
-          [ -s errors.txt ] || tail -60 build.log > errors.txt
+          echo "---- tail ----" >> errors.txt
+          tail -90 build.log >> errors.txt
           split -l 12 errors.txt chunk_
           for f in chunk_*; do
             msg=$(sed -e 's/%/%25/g' "$f" | awk '{printf "%s%%0A", $0}')
