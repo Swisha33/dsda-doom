@@ -1,0 +1,31 @@
+name: PS Vita
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  vpk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install host tools
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+      - name: Install VitaSDK
+        run: |
+          export VITASDK=$HOME/vitasdk
+          curl -fsSL https://raw.githubusercontent.com/vitasdk/vdpm/master/bootstrap-vitasdk.sh -o bootstrap-vitasdk.sh
+          bash bootstrap-vitasdk.sh --install-dir "$VITASDK"
+          echo "VITASDK=$VITASDK" >> "$GITHUB_ENV"
+          echo "$VITASDK/bin" >> "$GITHUB_PATH"
+
+      - name: Build VPK
+        run: prboom2/vita/build.sh --deps
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dsda-doom-vita
+          path: prboom2/build-vita/src/dsda-doom.vpk

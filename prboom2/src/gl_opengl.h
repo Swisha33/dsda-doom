@@ -41,7 +41,9 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#if SDL_VERSION_ATLEAST(1, 3, 0)
+#if defined(__vita__)
+#include "vita/glu_stub.h"	/* software-only build: no system GL/GLU */
+#elif SDL_VERSION_ATLEAST(1, 3, 0)
 #if defined(__MACOSX__)
 #include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
 #include <OpenGL/glu.h>	/* Header File For The GLU Library */

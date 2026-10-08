@@ -602,3 +602,72 @@ function(AddGameExecutable TARGET SOURCES)
 endfunction()
 
 AddGameExecutable(dsda-doom "${DSDA_SOURCES}")
+
+# ---------------------------------------------------------------------------
+# PS Vita: no-op GL stubs, launcher (eboot.bin) and VPK packaging
+# ---------------------------------------------------------------------------
+if(VITA)
+    include("${VITASDK}/share/vita.cmake" REQUIRED)
+
+    set(DSDA_VITA_TITLEID "DSDA00001" CACHE STRING "PS Vita title ID (9 characters)")
+    set(DSDA_VITA_VERSION "01.00" CACHE STRING "PS Vita app version (##.##)")
+    set(DSDA_VITA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../vita")
+
+    add_library(dsda_vita_glstubs STATIC
+        vita/gl_stubs.c
+        vita/glu_stub.c
+    )
+    target_include_directories(dsda_vita_glstubs
+        PRIVATE
+        "${VITASDK}/arm-vita-eabi/include/SDL2"
+    )
+
+    # The engine itself, started by the launcher
+    vita_create_self(dsda-doom.bin dsda-doom UNSAFE)
+
+    # Launcher: picks IWAD / PWADs / DEH and starts dsda-doom.bin
+    add_executable(dsda-launcher "${DSDA_VITA_DIR}/launcher/launcher.c")
+    target_link_libraries(dsda-launcher
+        PRIVATE
+        vita2d
+        freetype
+        png
+        jpeg
+        z
+        m
+        SceAppMgr_stub
+        SceAppUtil_stub
+        SceCommonDialog_stub
+        SceCtrl_stub
+        SceDisplay_stub
+        SceGxm_stub
+        ScePgf_stub
+        ScePvf_stub
+        SceSysmodule_stub
+    )
+    vita_create_self(eboot.bin dsda-launcher UNSAFE)
+
+    vita_create_vpk(dsda-doom.vpk ${DSDA_VITA_TITLEID} eboot.bin
+        VERSION ${DSDA_VITA_VERSION}
+        NAME "dsda-doom"
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/dsda-doom.bin" dsda-doom.bin
+        FILE "${WAD_DATA_PATH}" dsda-doom.wad
+        FILE "${DSDA_VITA_DIR}/sce_sys/icon0.png" sce_sys/icon0.png
+        FILE "${DSDA_VITA_DIR}/sce_sys/livearea/contents/bg.png" sce_sys/livearea/contents/bg.png
+        FILE "${DSDA_VITA_DIR}/sce_sys/livearea/contents/startup.png" sce_sys/livearea/contents/startup.png
+        FILE "${DSDA_VITA_DIR}/sce_sys/livearea/contents/template.xml" sce_sys/livearea/contents/template.xml
+    )
+    # dsda-doom.bin is packed as a plain file, so order the targets explicitly
+    # (vita.cmake appends -self / -vpk to target names on CMake >= 3.20)
+    if(TARGET dsda-doom.vpk-vpk)
+        set(dsda_vita_vpk_target dsda-doom.vpk-vpk)
+    else()
+        set(dsda_vita_vpk_target dsda-doom.vpk)
+    endif()
+    if(TARGET dsda-doom.bin-self)
+        add_dependencies(${dsda_vita_vpk_target} dsda-doom.bin-self)
+    else()
+        add_dependencies(${dsda_vita_vpk_target} dsda-doom.bin)
+    endif()
+    add_dependencies(${dsda_vita_vpk_target} dsda-doom-wad)
+endif()

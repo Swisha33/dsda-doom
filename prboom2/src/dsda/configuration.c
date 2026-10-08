@@ -229,6 +229,13 @@ void dsda_UpdateStrictMode(void) {
   dsda_TrackConfigFeatures();
 }
 
+// Platform-specific defaults (first value is used on PS Vita)
+#ifdef __vita__
+#define DSDA_PLATFORM_DEFAULT(vita, other) vita
+#else
+#define DSDA_PLATFORM_DEFAULT(vita, other) other
+#endif
+
 dsda_config_t dsda_config[dsda_config_count] = {
   [dsda_config_game_speed] = {
     "game_speed", dsda_config_game_speed,
@@ -687,7 +694,7 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_use_game_controller] = {
     "use_game_controller", dsda_config_use_game_controller,
-    dsda_config_int, 0, 2, { 0 }, NULL, NOT_STRICT, dsda_InitGameController
+    dsda_config_int, 0, 2, { DSDA_PLATFORM_DEFAULT(1, 0) }, NULL, NOT_STRICT, dsda_InitGameController
   },
   [dsda_config_deh_apply_cheats] = {
     "deh_apply_cheats", dsda_config_deh_apply_cheats,
@@ -1164,7 +1171,7 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_screen_resolution] = {
     "screen_resolution", dsda_config_screen_resolution,
-    CONF_STRING("640x480"), NULL, NOT_STRICT, M_ChangeVideoMode
+    CONF_STRING(DSDA_PLATFORM_DEFAULT("426x200", "640x480")), NULL, NOT_STRICT, M_ChangeVideoMode
   },
   [dsda_config_custom_resolution] = {
     "custom_resolution", dsda_config_custom_resolution,
@@ -1172,7 +1179,7 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_use_fullscreen] = {
     "use_fullscreen", dsda_config_use_fullscreen,
-    CONF_BOOL(0), NULL, NOT_STRICT, M_ChangeFullScreen
+    CONF_BOOL(DSDA_PLATFORM_DEFAULT(1, 0)), NULL, NOT_STRICT, M_ChangeFullScreen
   },
   [dsda_config_exclusive_fullscreen] = {
     "exclusive_fullscreen", dsda_config_exclusive_fullscreen,
@@ -1184,7 +1191,7 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_uncapped_framerate] = {
     "uncapped_framerate", dsda_config_uncapped_framerate,
-    CONF_BOOL(1), NULL, NOT_STRICT, M_ChangeUncappedFrameRate
+    CONF_BOOL(DSDA_PLATFORM_DEFAULT(0, 1)), NULL, NOT_STRICT, M_ChangeUncappedFrameRate
   },
   [dsda_config_fps_limit] = {
     "dsda_fps_limit", dsda_config_fps_limit,

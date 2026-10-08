@@ -307,6 +307,21 @@ static void my_pclose3 (pipeinfo_t *p)
   Z_Free (puser);
 }
 
+#elif defined(__vita__)
+// PS Vita: there are no child processes, so video capture is unavailable.
+
+static int my_popen3 (pipeinfo_t *p)
+{
+  (void) p;
+  lprintf (LO_WARN, "my_popen3: video capture is not supported on PS Vita\n");
+  return 0;
+}
+
+static void my_pclose3 (pipeinfo_t *p)
+{
+  (void) p;
+}
+
 #else // _WIN32
 // posix implementation
 // not tested

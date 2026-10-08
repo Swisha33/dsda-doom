@@ -1002,6 +1002,13 @@ static video_mode_t I_GetModeFromString(const char *modestr)
 {
   video_mode_t mode;
 
+#ifdef __vita__
+  // The PS Vita build has no OpenGL backend (GL calls are linked to no-op
+  // stubs), so always use the software renderer.
+  (void) modestr;
+  return VID_MODESW;
+#endif
+
   if (!stricmp(modestr,"gl")) {
     mode = VID_MODEGL;
   } else if (!stricmp(modestr,"OpenGL")) {

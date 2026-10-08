@@ -308,6 +308,49 @@ const char* I_GetTempDir(void)
   return "PROGDIR:";
 }
 
+#elif defined(__vita__)
+
+/* PS Vita: everything (config, saves, demos, screenshots, WADs) lives in
+ * ux0:data/dsda-doom. The engine's own dsda-doom.wad ships inside the VPK
+ * and is found through SDL_GetBasePath() ("app0:/"). */
+#include <sys/stat.h>
+
+#define VITA_DATA_DIR "ux0:data/dsda-doom"
+
+const char *I_ConfigDir(void)
+{
+  static dboolean created;
+
+  if (!created)
+  {
+    mkdir(VITA_DATA_DIR, 0777);
+    created = true;
+  }
+
+  return VITA_DATA_DIR;
+}
+
+const char *I_ExeDir(void)
+{
+  return I_ConfigDir();
+}
+
+const char *I_GetTempDir(void)
+{
+  return I_ConfigDir();
+}
+
+static const char *I_GetXDGDataHome(void)
+{
+  return I_ConfigDir();
+}
+
+/* Must not contain ':' because the search code splits on PATH_SEPARATOR. */
+static const char *I_GetXDGDataDirs(void)
+{
+  return "";
+}
+
 #else /* not Windows, not Amiga */
 
 static const char *I_GetHomeDir(void)

@@ -69,6 +69,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <string.h>
 
 #include "e6y.h"
 
@@ -78,6 +79,60 @@
 #include "dsda/args.h"
 #include "dsda/endoom.h"
 #include "dsda/settings.h"
+
+#ifdef __vita__
+#include <psp2/kernel/processmgr.h>
+#include <psp2/power.h>
+
+/* Give newlib a big heap: large PWADs and the zone allocator need it. */
+int _newlib_heap_size_user = 256 * 1024 * 1024;
+
+/* The launcher (eboot.bin) writes the chosen command line here, one
+ * argument per line, then starts this executable. */
+#define VITA_ARGS_FILE "ux0:data/dsda-doom/launch_args.txt"
+#define VITA_MAX_ARGS 256
+
+static void I_VitaLoadArgs(int *argc, char ***argv)
+{
+  static char *args[VITA_MAX_ARGS + 1];
+  char line[1024];
+  FILE *f;
+  int n = 0;
+
+  if (*argc > 1)
+    return; // real command line given, keep it
+
+  f = fopen(VITA_ARGS_FILE, "r");
+  if (!f)
+    return;
+
+  args[n++] = "app0:dsda-doom.bin";
+  while (n < VITA_MAX_ARGS && fgets(line, sizeof(line), f))
+  {
+    size_t len = strlen(line);
+
+    while (len && (line[len - 1] == '\n' || line[len - 1] == '\r'))
+      line[--len] = 0;
+    if (!len)
+      continue;
+    args[n++] = strdup(line);
+  }
+  fclose(f);
+
+  args[n] = NULL;
+  *argc = n;
+  *argv = args;
+}
+
+static void I_VitaInit(void)
+{
+  /* Run at full speed; Doom's software renderer is CPU bound. */
+  scePowerSetArmClockFrequency(444);
+  scePowerSetBusClockFrequency(222);
+  scePowerSetGpuClockFrequency(222);
+  scePowerSetGpuXbarClockFrequency(166);
+}
+#endif
 #include "dsda/signal_context.h"
 #include "dsda/split_tracker.h"
 #include "dsda/text_file.h"
@@ -266,6 +321,11 @@ void I_SetProcessPriority(void)
 //int main(int argc, const char * const * argv)
 int main(int argc, char **argv)
 {
+#ifdef __vita__
+  I_VitaInit();
+  I_VitaLoadArgs(&argc, &argv);
+#endif
+
   dsda_ParseCommandLineArgs(argc, argv);
 
   if (dsda_Flag(dsda_arg_verbose))

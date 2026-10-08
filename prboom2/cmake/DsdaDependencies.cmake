@@ -1,5 +1,10 @@
 include_guard()
 
+if(VITA)
+  include(DsdaVitaDependencies)
+  return()
+endif()
+
 if(STRICT_FIND)
   set(dsda_strict_keyword REQUIRED)
 endif()

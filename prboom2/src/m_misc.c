@@ -73,6 +73,13 @@ typedef struct
 
 #define SETTING_HEADING(str) { str, 0 }
 #define INPUT_SETTING(str, id, k, m, j) { str, id, { k, m, j } }
+
+// PS Vita has no analog triggers: fire on R, run on L, automap on SELECT.
+#ifdef __vita__
+#define VITA_PAD(vita, other) (vita)
+#else
+#define VITA_PAD(vita, other) (other)
+#endif
 #define MIGRATED_SETTING(id) { NULL, id }
 
 cfg_def_t cfg_defs[] =
@@ -392,10 +399,10 @@ cfg_input_def_t input_defs[] = {
   INPUT_SETTING("input_backward", dsda_input_backward, 's', -1, -1),
   INPUT_SETTING("input_turnleft", dsda_input_turnleft, 'e', -1, -1),
   INPUT_SETTING("input_turnright", dsda_input_turnright, 'q', -1, -1),
-  INPUT_SETTING("input_speed", dsda_input_speed, 0, -1, -1),
+  INPUT_SETTING("input_speed", dsda_input_speed, 0, -1, VITA_PAD(DSDA_CONTROLLER_BUTTON_LEFTSHOULDER, -1)),
   INPUT_SETTING("input_strafeleft", dsda_input_strafeleft, 'a', -1, -1),
   INPUT_SETTING("input_straferight", dsda_input_straferight, 'd', -1, -1),
-  INPUT_SETTING("input_strafe", dsda_input_strafe, 0, 1, DSDA_CONTROLLER_BUTTON_LEFTSHOULDER),
+  INPUT_SETTING("input_strafe", dsda_input_strafe, 0, 1, VITA_PAD(-1, DSDA_CONTROLLER_BUTTON_LEFTSHOULDER)),
   INPUT_SETTING("input_autorun", dsda_input_autorun, KEYD_CAPSLOCK, -1, DSDA_CONTROLLER_BUTTON_LEFTSTICK),
   INPUT_SETTING("input_reverse", dsda_input_reverse, '/', -1, DSDA_CONTROLLER_BUTTON_RIGHTSTICK),
   INPUT_SETTING("input_use", dsda_input_use, ' ', -1, DSDA_CONTROLLER_BUTTON_A),
@@ -417,11 +424,11 @@ cfg_input_def_t input_defs[] = {
   INPUT_SETTING("input_nextweapon", dsda_input_nextweapon, 0, -1, DSDA_CONTROLLER_BUTTON_Y),
   INPUT_SETTING("input_prevweapon", dsda_input_prevweapon, 0, -1, DSDA_CONTROLLER_BUTTON_X),
   INPUT_SETTING("input_toggleweapon", dsda_input_toggleweapon, '0', -1, -1),
-  INPUT_SETTING("input_fire", dsda_input_fire, KEYD_RCTRL, 0, DSDA_CONTROLLER_BUTTON_TRIGGERRIGHT),
+  INPUT_SETTING("input_fire", dsda_input_fire, KEYD_RCTRL, 0, VITA_PAD(DSDA_CONTROLLER_BUTTON_RIGHTSHOULDER, DSDA_CONTROLLER_BUTTON_TRIGGERRIGHT)),
 
   INPUT_SETTING("input_help", dsda_input_help, KEYD_F1, -1, -1),
   INPUT_SETTING("input_pause", dsda_input_pause, KEYD_PAUSE, -1, -1),
-  INPUT_SETTING("input_map", dsda_input_map, KEYD_TAB, -1, DSDA_CONTROLLER_BUTTON_TRIGGERLEFT),
+  INPUT_SETTING("input_map", dsda_input_map, KEYD_TAB, -1, VITA_PAD(DSDA_CONTROLLER_BUTTON_BACK, DSDA_CONTROLLER_BUTTON_TRIGGERLEFT)),
   INPUT_SETTING("input_soundvolume", dsda_input_soundvolume, KEYD_F4, -1, -1),
   INPUT_SETTING("input_hud", dsda_input_hud, KEYD_F5, -1, -1),
   INPUT_SETTING("input_messages", dsda_input_messages, KEYD_F8, -1, -1),
