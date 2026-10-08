@@ -12,7 +12,7 @@ src=$(cd "$here/.." && pwd)
 build=${BUILD_DIR:-$src/build-vita}
 
 if [[ ${1:-} == --deps ]]; then
-	vdpm install \
+	VDPM_NONINTERACTIVE=1 vdpm install \
 		sdl2 sdl2_mixer libsndfile libzip zlib libmad libvorbis libogg flac \
 		opusfile opus mpg123 lame libmodplug libxmp-lite bzip2 xz zstd openssl \
 		libvita2d freetype libpng libjpeg-turbo
